@@ -21,6 +21,7 @@ coverage/
 coverage.*
 htmlcov/
 .idea/
+.zed/
 .hypothesis/
 uv.lock
 .tox

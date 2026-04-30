@@ -23,6 +23,12 @@ def _add_common_sandbox_args(parser: argparse.ArgumentParser) -> None:
         help="local directory to mount into the sandbox container at /work",
     )
     parser.add_argument(
+        "--acp",
+        choices=["on", "off"],
+        default="off",
+        help="start the ACP server instead of the TUI",
+    )
+    parser.add_argument(
         "ARGS",
         nargs="*",
         help="instructions for the sandbox to process non-interactively",
@@ -71,6 +77,7 @@ def add_sandbox_subparsers(subparsers: argparse._SubParsersAction, img_comp: Cal
 class SandboxEngineArgsType(BaseEngineArgsType):
     ARGS: list[str]
     workdir: Optional[str]
+    acp: Optional[str]
 
 
 class SandboxEngine(Engine):
@@ -175,7 +182,10 @@ class OpenCode(Agent):
         self.add_env_options(args)
         self.engine.add_workdir(args)
         self.engine.add_args(args.opencode_image)
-        if args.ARGS or not self.engine.use_tty():
+        if args.acp == "on":
+            self.engine.add_args("acp")
+            self.engine.add_args("--cwd", "/work")
+        elif args.ARGS or not self.engine.use_tty():
             # Use the "run" command to process args from the command-line or stdin non-interatively
             self.engine.add_args("run", "--thinking=true")
             self.engine.add(args.ARGS)
